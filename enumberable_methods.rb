@@ -1,5 +1,8 @@
 module Enumerable
   
+  # http://stackoverflow.com/questions/2863044/what-is-the-advantage-of-creating-an-enumerable-object-using-to-enum-in-ruby
+  #i think the .to_enum is to use the internal/self made enum/iterators, but i'm not sure
+  #i think the each just iterates each thing
     def my_each
         return self.to_enum unless block_given?
         for i in self
@@ -7,14 +10,40 @@ module Enumerable
         end
     end
 
+=begin
+Yield is Syntax Sugar
+This example of yield:
+
+def do_something_for_each(array)
+  array.each do |el|
+    yield(el)
+  end
+end
+Is just syntax sugar for:
+
+def do_something_for_each(array, &block)
+  array.each do |el|
+    block.call(el)
+  end
+end
+Pick the syntax you like and run wild with it.  
+=end
+
     def my_each_with_index
         return self.to_enum unless block_given?
+#        Kernel#block_given? is a method which returns true if yield actually has something to do. Neat, huh?
+# i guess this is the index
         idx = 0
+        
+        #http://stackoverflow.com/questions/14309815/why-does-ruby-use-yield
         for i in self
+          #show item and index i think
             yield i, idx
+#increment index
             idx += 1
         end
     end
+
 
     def my_select
         return self.to_enum unless block_given?
@@ -114,25 +143,65 @@ module Enumerable
     end
 end
 
-@a = ["a","bit city life","c","hold on tight","e","zzzz","hit me up"]
-@b = {a: "bit city life",c: "hold on tight",p: "piratess"}
 
-@a.my_each {|a| puts "#{a}"}
 
-@a.each {|a| puts "#{a}"}
 
 =begin
-  
+  #looks like it is just comparing self made methods to enumerable methods
+@a.my_each {|a| puts "#{a}"}
+@a.each {|a| puts "#{a}"}
+
+  http://www.ruby-doc.org/core-2.1.5/Hash.html#method-i-each
+  h = { "a" => 100, "b" => 200 }
+h.each {|key, value| puts "#{key} is #{value}" }
+produces:
+
+a is 100
+b is 200
+
+
 @b.my_each {|a,b| puts "#{a} #{b}"}
 @b.each {|a,b| puts "#{a} #{b}"}
 
+
 @a.my_each_with_index {|a,b| puts "#{a} #{b}"}
 @a.each_with_index {|a,b| puts "#{a} #{b}"}
+#@a.each_with_index {|a,b| puts "#{b}. #{a}"}
+
+
+
+
+=begin
+  hash = Hash.new
+%w(cat dog wombat).each_with_index {|item, index|
+  hash[item] = index
+}
+hash   #=> {"cat"=>0, "dog"=>1, "wombat"=>2}
+
 @b.my_each_with_index {|a,b| puts "#{a} #{b}"}
 @b.each_with_index {|a,b| puts "#{a} #{b}"}
 
+
+=end
+
+
+@a = ["a","bit city life","c","hold on tight","e","zzzz","hit me up"]
+@b = {a: "bit city life",c: "hold on tight",p: "piratess"}
+
+
 @a.my_select {|a| a[0] == 'h'}
 @a.select {|a| a[0] == 'h'}
+
+#select
+#This useful method takes in one argument. The block you pass it should be some kind of true/false test. 
+#If the expression results in true for an element in an array, that element is kept as part of the returned collection
+#i think it only keeps the desired items 
+#puts [1,'a', 2, 'dog', 'cat', 5, 6].select{ |x| x.class==String}.join(", ")           
+puts [1,'a', 2, 'dog', 'cat', 5, 6].my_select{ |x| x.class==String}.join(", ")           
+
+
+
+=begin
 @b.my_select {|a,b| b[0] == 'h'}
 @b.select {|a,b| b[0] == 'h'}
 
